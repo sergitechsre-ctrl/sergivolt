@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SergiVolt — Transformadores para Amplificadores Valvulados</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #07090c;
+  --dark: #0d1117;
+  --dark2: #161b22;
+  --dark3: #1c2330;
+  --volt: #c8ff00;
+  --volt2: #a8d900;
+  --volt-dim: rgba(200,255,0,0.1);
+  --volt-glow: rgba(200,255,0,0.25);
+  --white: #f0f4f8;
+  --gray: #8b9ab0;
+  --gray2: #4a5568;
+  --red: #ff3b3b;
+  --display: 'Bebas Neue', sans-serif;
+  --body: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--body);
+  overflow-x: hidden;
+}
+
+/* ─── NOISE TEXTURE ─── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 999;
+  opacity: .4;
+}
+
+/* ─── HERO CIRCUIT LINES ─── */
+.circuit-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+.circuit-bg svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .07;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 3rem;
+  background: rgba(7,9,12,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(200,255,0,0.08);
+}
+
+.nav-logo {
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: .08em;
+  color: var(--white);
+}
+.nav-logo span { color: var(--volt); }
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+}
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  color: var(--gray);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--volt); }
+
+.nav-cta {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--black);
+  background: var(--volt);
+  padding: 9px 20px;
+  border-radius: 2px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background .2s, box-shadow .2s;
+}
+.nav-cta:hover {
+  background: #d8ff20;
+  box-shadow: 0 0 20px var(--volt-glow);
+}
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 8rem 3rem 4rem;
+  overflow: hidden;
+}
+
+.hero-glow {
+  position: absolute;
+  top: 20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  color: var(--volt);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp .8s .2s forwards;
+}
+.hero-tag::before {
+  content: '';
+  width: 24px; height: 1px;
+  background: var(--volt);
+}
+
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(5rem, 12vw, 10rem);
+  line-height: .92;
+  letter-spacing: .02em;
+  color: var(--white);
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeUp .8s .35s forwards;
+}
+.hero-title .volt { color: var(--volt); }
+.hero-title .stroke {
+  -webkit-text-stroke: 2px var(--white);
+  color: transparent;
+}
+
+.hero-sub {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--gray);
+  max-width: 520px;
+  line-height: 1.65;
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp .8s .5s forwards;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  opacity: 0;
+  animation: fadeUp .8s .65s forwards;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--volt);
+  color: var(--black);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 14px 28px;
+  border-radius: 2px;
+  transition: box-shadow .2s, background .2s;
+}
+.btn-primary:hover {
+  background: #d8ff20;
+  box-shadow: 0 0 30px var(--volt-glow);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color .2s;
+}
+.btn-secondary:hover { color: var(--white); }
+.btn-secondary::after {
+  content: '→';
+  transition: transform .2s;
+}
+.btn-secondary:hover::after { transform: translateX(4px); }
+
+/* toroidal SVG hero */
+.hero-visual {
+  position: absolute;
+  right: 4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  animation: fadeIn 1.2s .8s forwards;
+}
+.hero-visual svg {
+  width: 380px;
+  height: 380px;
+  filter: drop-shadow(0 0 40px rgba(200,255,0,0.15));
+}
+
+/* ─── STATS BAR ─── */
+.stats-bar {
+  background: var(--dark2);
+  border-top: 1px solid rgba(200,255,0,0.1);
+  border-bottom: 1px solid rgba(200,255,0,0.1);
+  padding: 1.5rem 3rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.stat-num {
+  font-family: var(--display);
+  font-size: 36px;
+  letter-spacing: .04em;
+  color: var(--volt);
+  line-height: 1;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+.stat-div {
+  width: 1px;
+  height: 40px;
+  background: var(--gray2);
+}
+
+/* ─── SECTION ─── */
+section {
+  padding: 6rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  color: var(--volt);
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-tag::before {
+  content: '';
+  width: 20px; height: 1px;
+  background: var(--volt);
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: .03em;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+
+.section-desc {
+  font-size: 17px;
+  font-weight: 300;
+  color: var(--gray);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 3rem;
+}
+
+/* ─── PRODUTOS ─── */
+.produtos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5px;
+  background: var(--gray2);
+  border: 1.5px solid var(--gray2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.produto-card:last-child {
+  grid-column: 1 / -1;
+}
+
+.produto-card {
+  background: var(--dark);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background .3s;
+  cursor: default;
+}
+.produto-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--volt);
+  transform: scaleX(0);
+  transition: transform .3s;
+  transform-origin: left;
+}
+.produto-card:hover { background: var(--dark2); }
+.produto-card:hover::before { transform: scaleX(1); }
+
+.produto-num {
+  font-family: var(--display);
+  font-size: 56px;
+  color: rgba(200,255,0,0.08);
+  line-height: 1;
+  margin-bottom: .5rem;
+  transition: color .3s;
+}
+.produto-card:hover .produto-num { color: rgba(200,255,0,0.15); }
+
+.produto-name {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: .05em;
+  color: var(--white);
+  margin-bottom: .5rem;
+}
+
+.produto-spec {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--volt);
+  margin-bottom: .75rem;
+}
+
+.produto-desc {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.65;
+}
+
+/* ─── DIFERENCIAIS ─── */
+.diff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.diff-card {
+  border: 1px solid var(--dark3);
+  border-radius: 4px;
+  padding: 1.75rem;
+  background: var(--dark);
+  transition: border-color .3s, box-shadow .3s;
+}
+.diff-card:hover {
+  border-color: rgba(200,255,0,0.3);
+  box-shadow: 0 0 20px rgba(200,255,0,0.05);
+}
+
+.diff-icon {
+  font-size: 28px;
+  margin-bottom: 1rem;
+}
+
+.diff-title {
+  font-family: var(--display);
+  font-size: 20px;
+  letter-spacing: .04em;
+  color: var(--white);
+  margin-bottom: .5rem;
+}
+
+.diff-text {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.65;
+}
+
+/* ─── COMO PEDIR ─── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0;
+  position: relative;
+}
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gray2), var(--gray2), transparent);
+}
+
+.step {
+  padding: 0 1.5rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.step-num {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--dark2);
+  border: 2px solid var(--volt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 22px;
+  color: var(--volt);
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 0 16px rgba(200,255,0,0.2);
+}
+
+.step-title {
+  font-family: var(--display);
+  font-size: 18px;
+  letter-spacing: .04em;
+  color: var(--white);
+  margin-bottom: .5rem;
+}
+
+.step-text {
+  font-size: 13px;
+  color: var(--gray);
+  line-height: 1.6;
+}
+
+/* ─── CONTATO ─── */
+.contato-wrapper {
+  background: var(--dark2);
+  border: 1px solid rgba(200,255,0,0.15);
+  border-radius: 4px;
+  padding: 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.contato-info h2 {
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  letter-spacing: .03em;
+  color: var(--white);
+  line-height: 1.05;
+  margin-bottom: 1rem;
+}
+.contato-info h2 span { color: var(--volt); }
+
+.contato-info p {
+  font-size: 15px;
+  color: var(--gray);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.contato-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+.contato-icon {
+  width: 38px; height: 38px;
+  background: var(--volt-dim);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.contato-text {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--white);
+}
+.contato-text small {
+  display: block;
+  font-size: 11px;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.contato-cta {
+  text-align: center;
+}
+.whatsapp-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--volt);
+  color: var(--black);
+  text-decoration: none;
+  padding: 1.5rem 3rem;
+  border-radius: 4px;
+  font-family: var(--display);
+  font-size: 28px;
+  letter-spacing: .05em;
+  transition: box-shadow .2s, background .2s;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+.whatsapp-btn:hover {
+  background: #d8ff20;
+  box-shadow: 0 0 40px var(--volt-glow);
+}
+.whatsapp-btn small {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  font-weight: 400;
+}
+
+.pix-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--gray);
+  letter-spacing: .08em;
+}
+.pix-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--volt);
+  box-shadow: 0 0 8px var(--volt);
+  animation: pulse 2s infinite;
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--dark2);
+  border-top: 1px solid var(--dark3);
+  padding: 2rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-logo {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: .1em;
+  color: var(--white);
+}
+.footer-logo span { color: var(--volt); }
+
+.footer-text {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray);
+  letter-spacing: .06em;
+  text-align: center;
+}
+
+.footer-loc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--gray);
+  letter-spacing: .06em;
+  text-align: right;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--volt); }
+  50% { box-shadow: 0 0 16px var(--volt); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spin-slow-rev {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.ring-outer { animation: spin-slow 12s linear infinite; transform-origin: center; }
+.ring-inner { animation: spin-slow-rev 8s linear infinite; transform-origin: center; }
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .hero { padding: 7rem 1.5rem 3rem; }
+  .hero-visual { display: none; }
+  section { padding: 4rem 1.5rem; }
+  .stats-bar { padding: 1.5rem; gap: 1rem; }
+  .contato-wrapper { grid-template-columns: 1fr; padding: 2rem; }
+  footer { flex-direction: column; text-align: center; padding: 1.5rem; }
+  .footer-loc { text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">SERGI<span>VOLT</span></div>
+  <ul class="nav-links">
+    <li><a href="#produtos">Produtos</a></li>
+    <li><a href="#diferenciais">Por que SergiVolt</a></li>
+    <li><a href="#como-pedir">Como pedir</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+  <a href="https://wa.me/5579998273888" class="nav-cta">Pedir orçamento</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="circuit-bg">
+    <svg viewBox="0 0 1200 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="150" x2="400" y2="150" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="400" y1="150" x2="400" y2="300" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="400" y1="300" x2="700" y2="300" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="700" y1="300" x2="700" y2="100" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="700" y1="100" x2="1200" y2="100" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="200" y1="500" x2="200" y2="350" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="200" y1="350" x2="550" y2="350" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="550" y1="350" x2="550" y2="550" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="550" y1="550" x2="900" y2="550" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="900" y1="550" x2="900" y2="450" stroke="#c8ff00" stroke-width="1"/>
+      <line x1="900" y1="450" x2="1200" y2="450" stroke="#c8ff00" stroke-width="1"/>
+      <circle cx="400" cy="150" r="4" fill="#c8ff00"/>
+      <circle cx="400" cy="300" r="4" fill="#c8ff00"/>
+      <circle cx="700" cy="300" r="4" fill="#c8ff00"/>
+      <circle cx="700" cy="100" r="4" fill="#c8ff00"/>
+      <circle cx="200" cy="350" r="4" fill="#c8ff00"/>
+      <circle cx="550" cy="350" r="4" fill="#c8ff00"/>
+      <circle cx="550" cy="550" r="4" fill="#c8ff00"/>
+      <circle cx="900" cy="550" r="4" fill="#c8ff00"/>
+      <circle cx="900" cy="450" r="4" fill="#c8ff00"/>
+    </svg>
+  </div>
+
+  <div class="hero-glow"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">Transformadores para Valvulados · Barra dos Coqueiros — SE</div>
+    <h1 class="hero-title">
+      SERGI<span class="volt">VOLT</span><br>
+      <span class="stroke">ENERGIA</span><br>
+      REAL
+    </h1>
+    <p class="hero-sub">Toroidal, EI de alta tensão, transformador de saída, casador de impedância. Qualquer transformador para o seu projeto valvulado — calculado, fabricado e testado sob encomenda.</p>
+    <div class="hero-actions">
+      <a href="https://wa.me/5579998273888" class="btn-primary">
+        ⚡ Solicitar orçamento
+      </a>
+      <a href="#produtos" class="btn-secondary">Ver produtos</a>
+    </div>
+  </div>
+
+  <!-- TOROIDAL ILLUSTRATION -->
+  <div class="hero-visual">
+    <svg viewBox="0 0 380 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- outer ring -->
+      <circle cx="190" cy="190" r="160" stroke="#c8ff00" stroke-width="1.5" stroke-dasharray="8 4" class="ring-outer"/>
+      <!-- toro body outer -->
+      <ellipse cx="190" cy="190" rx="140" ry="140" stroke="rgba(200,255,0,0.3)" stroke-width="28" fill="none"/>
+      <!-- toro body inner -->
+      <ellipse cx="190" cy="190" rx="140" ry="140" stroke="rgba(200,255,0,0.08)" stroke-width="24" fill="none"/>
+      <!-- winding lines -->
+      <ellipse cx="190" cy="190" rx="140" ry="140" stroke="#c8ff00" stroke-width="2" stroke-dasharray="12 6" fill="none" class="ring-inner"/>
+      <!-- inner hole -->
+      <circle cx="190" cy="190" r="72" fill="var(--black)" stroke="rgba(200,255,0,0.2)" stroke-width="1"/>
+      <!-- center label -->
+      <text x="190" y="182" fill="#c8ff00" font-family="'Bebas Neue',sans-serif" font-size="22" text-anchor="middle" letter-spacing="3">TOROIDAL</text>
+      <text x="190" y="205" fill="rgba(200,255,0,0.5)" font-family="'DM Mono',monospace" font-size="10" text-anchor="middle">GO · 1,8T · 18.000G · 60Hz</text>
+      <!-- glow center -->
+      <circle cx="190" cy="190" r="60" fill="rgba(200,255,0,0.03)"/>
+      <!-- dots around -->
+      <circle cx="190" cy="32" r="5" fill="#c8ff00"/>
+      <circle cx="190" cy="348" r="5" fill="#c8ff00"/>
+      <circle cx="32" cy="190" r="5" fill="#c8ff00"/>
+      <circle cx="348" cy="190" r="5" fill="#c8ff00"/>
+      <!-- radial lines -->
+      <line x1="190" y1="32" x2="190" y2="52" stroke="#c8ff00" stroke-width="1.5"/>
+      <line x1="190" y1="328" x2="190" y2="348" stroke="#c8ff00" stroke-width="1.5"/>
+      <line x1="32" y1="190" x2="52" y2="190" stroke="#c8ff00" stroke-width="1.5"/>
+      <line x1="328" y1="190" x2="348" y2="190" stroke="#c8ff00" stroke-width="1.5"/>
+    </svg>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-num">4</div>
+    <div class="stat-label">tipos de trafo</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num">1,8T</div>
+    <div class="stat-label">18.000 Gauss GO</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num">AT</div>
+    <div class="stat-label">Alta tensão valvulado</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num">100%</div>
+    <div class="stat-label">Sob encomenda</div>
+  </div>
+  <div class="stat-div"></div>
+  <div class="stat">
+    <div class="stat-num">BR</div>
+    <div class="stat-label">Entrega nacional</div>
+  </div>
+</div>
+
+<!-- PRODUTOS -->
+<section id="produtos">
+  <div class="section-tag">Linha de produtos</div>
+  <h2 class="section-title">TRANSFORMADORES<br>PARA VALVULADOS</h2>
+  <p class="section-desc">Cada transformador é calculado para o seu projeto específico — tensão, corrente, impedância. Fabricado com materiais premium e testado antes do envio.</p>
+
+  <div class="produtos-grid">
+    <div class="produto-card">
+      <div class="produto-num">01</div>
+      <div class="produto-name">TOROIDAL</div>
+      <div class="produto-spec">500VA a 1000VA · GO 1,8T · Bivolt</div>
+      <div class="produto-desc">Fonte de alimentação de baixa tensão para amplificadores Hi-Fi e equipamentos de áudio. Silencioso, compacto, sem campo magnético irradiado.</div>
+    </div>
+    <div class="produto-card">
+      <div class="produto-num">02</div>
+      <div class="produto-name">ALTA TENSÃO (EI)</div>
+      <div class="produto-spec">200V a 500V · múltiplos secundários</div>
+      <div class="produto-desc">Trafo de alimentação principal para amplificadores valvulados. Fornece alta tensão para placas, bias e filamento. Calculado para as válvulas do seu projeto.</div>
+    </div>
+    <div class="produto-card">
+      <div class="produto-num">03</div>
+      <div class="produto-name">TRANSFORMADOR DE SAÍDA</div>
+      <div class="produto-spec">Casamento válvula · alto-falante</div>
+      <div class="produto-desc">O coração do amplificador valvulado. Faz o casamento de impedância entre as válvulas de potência (6L6, EL34, KT88…) e o alto-falante. Calculado para o seu circuito.</div>
+    </div>
+    <div class="produto-card">
+      <div class="produto-num">04</div>
+      <div class="produto-name">SOB MEDIDA</div>
+      <div class="produto-spec">Qualquer especificação</div>
+      <div class="produto-desc">Tem um esquema elétrico e precisa de um transformador específico? Mande os dados — tensões, correntes, impedâncias — e fabricamos exatamente o que o seu projeto pede.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DIFERENCIAIS -->
+<section id="diferenciais" style="background: var(--dark); margin: 0; max-width: 100%; padding: 6rem 0;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 3rem;">
+    <div class="section-tag">Por que SergiVolt</div>
+    <h2 class="section-title">QUALIDADE<br>QUE SE MEDE</h2>
+    <p class="section-desc">Cada transformador é calculado matematicamente, fabricado com materiais premium e testado antes de sair daqui.</p>
+
+    <div class="diff-grid">
+      <div class="diff-card">
+        <div class="diff-icon">🎛️</div>
+        <div class="diff-title">ESPECIALISTA EM VALVULADOS</div>
+        <div class="diff-text">Conhecimento profundo de circuitos valvulados — de amplificadores Hi-Fi a transmissores. Calculamos toroidal, EI de alta tensão, transformador de saída e casador de impedância.</div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon">⚡</div>
+        <div class="diff-title">AÇO GO 1,8T · 18.000 GAUSS</div>
+        <div class="diff-text">Aço silício de grão orientado com indução máxima de 1,8 Tesla — acima do padrão industrial. Mais potência, menos perdas, núcleo otimizado para o seu projeto.</div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon">📐</div>
+        <div class="diff-title">CALCULADO PARA O SEU CIRCUITO</div>
+        <div class="diff-text">Mande o esquema ou as especificações — válvulas, tensões, impedâncias. Calculamos tudo do zero e fabricamos exatamente o que o projeto pede. Nada genérico.</div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon">🔬</div>
+        <div class="diff-title">TESTADO COM VARIAC</div>
+        <div class="diff-text">Cada transformador é testado antes de sair — verificamos saturação, tensões, corrente de magnetização. Você recebe o produto validado, não uma aposta.</div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon">🇧🇷</div>
+        <div class="diff-title">FABRICAÇÃO NACIONAL</div>
+        <div class="diff-text">100% fabricado em Sergipe. Sem importação, sem espera alfandegária. Transformador de saída sob medida que você não acha no Brasil — a gente faz.</div>
+      </div>
+      <div class="diff-card">
+        <div class="diff-icon">💬</div>
+        <div class="diff-title">FALE COM O FABRICANTE</div>
+        <div class="diff-text">Sem intermediários. Você fala direto com o técnico que calcula e fabrica. Dúvidas sobre o projeto? A gente resolve junto antes de enrolar o primeiro fio.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO PEDIR -->
+<section id="como-pedir">
+  <div class="section-tag">Processo</div>
+  <h2 class="section-title">COMO PEDIR</h2>
+  <p class="section-desc">Simples, rápido e sem burocracia. Do pedido à entrega em poucos dias.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">ENTRE EM CONTATO</div>
+      <div class="step-text">Mande mensagem no WhatsApp com a tensão e potência que precisa. Respondemos rápido.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">ORÇAMENTO</div>
+      <div class="step-text">Calculamos o transformador para o seu projeto e enviamos o valor com prazo de entrega.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">PAGAMENTO</div>
+      <div class="step-text">Pagamento via Pix adiantado. Simples e seguro — sem taxa de plataforma.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">FABRICAÇÃO</div>
+      <div class="step-text">Fabricamos e testamos o seu transformador. Acompanhamento por WhatsApp.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-title">ENTREGA</div>
+      <div class="step-text">Enviamos pelos Correios para todo o Brasil com código de rastreamento.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section id="contato" style="padding: 4rem 3rem 6rem; max-width: 1200px; margin: 0 auto;">
+  <div class="contato-wrapper">
+    <div class="contato-info">
+      <h2>FALE COM A<br><span>SERGIVOLT</span></h2>
+      <p>Mande sua especificação — tensão primária, tensão secundária e potência — e calculamos o transformador ideal para o seu projeto.</p>
+
+      <div class="contato-item">
+        <div class="contato-icon">📱</div>
+        <div class="contato-text">
+          (79) 99827-3888
+          <small>WhatsApp · SergiVolt</small>
+        </div>
+      </div>
+      <div class="contato-item">
+        <div class="contato-icon">📍</div>
+        <div class="contato-text">
+          Barra dos Coqueiros — SE
+          <small>Sergipe · Brasil</small>
+        </div>
+      </div>
+      <div class="contato-item">
+        <div class="contato-icon">🚚</div>
+        <div class="contato-text">
+          Entrega nacional
+          <small>Correios PAC/SEDEX para todo o Brasil</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="contato-cta">
+      <a href="https://wa.me/5579998273888?text=Olá! Gostaria de um orçamento para um transformador para amplificador valvulado." class="whatsapp-btn">
+        <small>CLIQUE PARA PEDIR</small>
+        ⚡ WHATSAPP
+      </a>
+      <div class="pix-badge">
+        <div class="pix-dot"></div>
+        Pagamento via Pix · sem taxas
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">SERGI<span>VOLT</span></div>
+  <div class="footer-text">
+    Transformadores para Amplificadores Valvulados · Fabricação sob encomenda<br>
+    Barra dos Coqueiros · SE · Brasil
+  </div>
+  <div class="footer-loc">
+    Barra dos Coqueiros · SE<br>
+    Brasil
+  </div>
+</footer>
+
+</body>
+</html>
